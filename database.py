@@ -41,6 +41,22 @@ def insert_verse(book_id, chapter_id, version_id, verse_number, verse_text):
             return verse_id
 
 
+def get_books():
+    """Get all books from the database."""
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+            cur.execute(f'''SELECT * FROM webapp_book;''')
+            books = cur.fetchall()
+            return books
+
+
+def get_chapters(book_id):
+    """Get all chapters from a book."""
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+            cur.execute(f'''SELECT * FROM webapp_chapter WHERE book_id = {book_id};''')
+            chapters = cur.fetchall()
+            return chapters
 # get_verse_id('1 Coríntios', '1', '1')
 # get_chapter_id
 # get_book_id
