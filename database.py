@@ -40,6 +40,7 @@ def insert_verse(book_id, chapter_id, version_id, verse_number, verse_text):
             conn.commit()
             return verse_id
 
+
 def insert_reference(book_id, chapter_id, verse_id, reference_text):
     """Insert a reference into the database."""
     with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
@@ -72,8 +73,44 @@ def insert_dictionary(book_id, chapter_id, verse, dictionary_text):
                 conn.commit()
                 cur.execute(f'''INSERT INTO webapp_verse_dictionaries (verse_id, dictionary_id) VALUES ({verse_id},{dictionary_id}) RETURNING id;''')
                 conn.commit()
-            
+
             return dictionary[0]
+
+
+def insert_interlinear(book_id, chapter_id, verse_id, interlinear_text):
+    """Insert an interlinear into the database."""
+    if interlinear_text == 'Nenhum registro encontrado!':
+        return False
+    interlinear = interlinear_text.split('\n')
+    strong = interlinear[0].split(':').strip()
+    definition = interlinear[1].split(':').strip()
+    origin = interlinear[2].split(':').strip()
+    use = interlinear[3].split(':').strip()
+    classification = interlinear[4].split(':').strip()
+    transcription = interlinear[5].strip()
+    pronounce = interlinear[6].strip()
+    if len(interlinear) > 7:
+        spelling = interlinear[7].strip()
+    else:
+        spelling = ''
+
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+            # select interlinear by strong
+            cur.execute(f'''SELECT * FROM webapp_interlinear WHERE strong = '{strong}';''')
+            interlinear = cur.fetchone()
+            if interlinear:
+                interlinear_id = interlinear[0]
+                cur.execute(f'''INSERT INTO webapp_verse_interlinear (verse_id, interlinear_id) VALUES ({verse_id}, {interlinear_id}) RETURNING id;''')
+                conn.commit()
+            else:
+                cur.execute(f'''INSERT INTO webapp_interlinear (strong, definition, origin, use, classification, transcription, pronounce, spelling) VALUES ('{strong}', '{definition}', '{origin}', '{use}', '{classification}', '{transcription}', '{pronounce}', '{spelling}') RETURNING id;''')
+                interlinear_id = cur.fetchone()[0]
+                conn.commit()
+                cur.execute(f'''INSERT INTO webapp_verse_interlinear (verse_id, interlinear_id) VALUES ({verse_id},{interlinear_id}) RETURNING id;''')                
+                conn.commit()     
+
+            return interlinear[0]
 
 
 def get_books():
@@ -106,3 +143,5 @@ def get_verse(book_id, chapter_id, verse_number):
 # get_chapter_id
 # get_book_id
 # insert_verse_version
+
+#oiYV=67+QR
