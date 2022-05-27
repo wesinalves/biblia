@@ -22,9 +22,9 @@ for book in books:
         for verse in range(1, chapter[2]):
             click_button(book[2], chapter[1], verse)
             #get_references(book[2], chapter[1], verse)
-            get_interlinear(book[2], chapter[1], verse)
+            #get_interlinear(book[2], chapter[1], verse)
             #get_dictionary(book[2], chapter[1], verse)
-            #get_versions(book[2], chapter[1], verse)
+            get_versions(book[2], chapter[1], verse)
             close_driver()
             time.sleep(1)
             break
