@@ -113,7 +113,7 @@ def insert_interlinear(book_id, chapter_id, verse_id, interlinear_text):
             return interlinear[0]
 
 
-def insert_versions(book_id, chapter_id, verse_id, version):
+def insert_version(verse_id, version):
     """Insert a version into the database."""
     if version['name'] == 'Nenhum registro encontrado!':
         return False
