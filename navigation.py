@@ -86,8 +86,16 @@ def get_versions(abbr, chapter, verse):
     time.sleep(2)
     version.click()
     time.sleep(1)
-    versions = driver.find_elements(By.XPATH, "//div[@class='toolResult']/ul")
-    for v in versions:
-        print(v.text)
+    versions = driver.find_elements(By.XPATH, "//div[@class='toolResult']/ul")        
+    for i in range(1, len(versions), 2):
+        version = {
+            'abbr': versions[i].text.split(' - ')[0],
+            'name': versions[i].text.split(' - ')[1],
+            'verse': versions[i + 1].text
+        }
+        print(version['abbr'], end=': ')
+        print(version['name'])
+        print(version['verse'])
+    
 
 #driver.close()
