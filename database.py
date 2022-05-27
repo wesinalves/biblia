@@ -113,6 +113,29 @@ def insert_interlinear(book_id, chapter_id, verse_id, interlinear_text):
             return interlinear[0]
 
 
+def insert_versions(book_id, chapter_id, verse_id, version):
+    """Insert a version into the database."""
+    if version['name'] == 'Nenhum registro encontrado!':
+        return False
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+
+            # select version by name
+            cur.execute(f'''SELECT * FROM webapp_version WHERE (abbreviation) = '{version['abbr']}';''')
+            version_id = cur.fetchone()
+            if version_id:
+                version_id = version_id[0]
+                cur.execute(f'''INSERT INTO webapp_verse_versions (verse_id, version_id) VALUES ({verse_id}, {version_id}) RETURNING id;''')
+                conn.commit()
+            else:
+                cur.execute(f'''INSERT INTO webapp_version (name, abbreviation, idiom_id, 'default') VALUES ('{version['name']}','{version['abbr']}', 1, false) RETURNING id;''')
+                version_id = cur.fetchone()[0]
+                conn.commit()
+                cur.execute(f'''INSERT INTO webapp_verse_versions (verse_id, version_id) VALUES ({verse_id},{version_id}) RETURNING id;''')
+                conn.commit()
+
+            return version
+
 def get_books():
     """Get all books from the database."""
     with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
