@@ -77,7 +77,7 @@ def insert_dictionary(book_id, chapter_id, verse, dictionary_text):
             return dictionary[0]
 
 
-def insert_interlinear(book_id, chapter_id, verse_id, interlinear_text):
+def insert_interlinear(verse_id, interlinear_text):
     """Insert an interlinear into the database."""
     if interlinear_text == 'Nenhum registro encontrado!':
         return False
@@ -125,13 +125,13 @@ def insert_version(verse_id, version):
             version_id = cur.fetchone()
             if version_id:
                 version_id = version_id[0]
-                cur.execute(f'''INSERT INTO webapp_verse_versions (verse_id, version_id) VALUES ({verse_id}, {version_id}) RETURNING id;''')
+                cur.execute(f'''INSERT INTO webapp_verseversion (verse_id, version_id, text) VALUES ({verse_id}, {version_id}, {version['verse']}) RETURNING id;''')
                 conn.commit()
             else:
                 cur.execute(f'''INSERT INTO webapp_version (name, abbreviation, idiom_id, 'default') VALUES ('{version['name']}','{version['abbr']}', 1, false) RETURNING id;''')
                 version_id = cur.fetchone()[0]
                 conn.commit()
-                cur.execute(f'''INSERT INTO webapp_verse_versions (verse_id, version_id) VALUES ({verse_id},{version_id}) RETURNING id;''')
+                cur.execute(f'''INSERT INTO webapp_verseversion (verse_id, version_id, text) VALUES ({verse_id}, {version_id}, {version['verse']}) RETURNING id;''')
                 conn.commit()
 
             return version
