@@ -12,6 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+from database import insert_dictionary, insert_interlinear, insert_reference, insert_version
 
 
 driver = webdriver.Firefox()
@@ -60,6 +61,7 @@ def get_interlinear(abbr, chapter, verse):
     for i in interlineares:
         print(i.text)
         #save in database
+        insert_interlinear(verse, i.text)
 
 
 def get_dictionary(abbr, chapter, verse):
@@ -77,6 +79,7 @@ def get_dictionary(abbr, chapter, verse):
         print(title)
         print(text)
         #save in database
+        insert_dictionary(abbr, chapter, verse, d.text)
 
 
 def get_versions(abbr, chapter, verse):
@@ -96,6 +99,7 @@ def get_versions(abbr, chapter, verse):
         print(version['abbr'], end=': ')
         print(version['name'])
         print(version['verse'])
+        insert_version(verse, version)
     
 
 #driver.close()
