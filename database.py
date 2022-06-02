@@ -117,6 +117,9 @@ def insert_version(verse_id, version):
     """Insert a version into the database."""
     if version['name'] == 'Nenhum registro encontrado!':
         return False
+    
+    idiom_id = get_idiom_by_version(version['abbr'])
+
     with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
         with conn.cursor() as cur:
 
@@ -128,13 +131,41 @@ def insert_version(verse_id, version):
                 cur.execute(f'''INSERT INTO webapp_verseversion (verse_id, version_id, text) VALUES ({verse_id}, {version_id}, {version['verse']}) RETURNING id;''')
                 conn.commit()
             else:
-                cur.execute(f'''INSERT INTO webapp_version (name, abbreviation, idiom_id, 'default') VALUES ('{version['name']}','{version['abbr']}', 1, false) RETURNING id;''')
+                cur.execute(f'''INSERT INTO webapp_version (name, abbreviation, idiom_id, 'default') VALUES ('{version['name']}','{version['abbr']}', {idiom_id}, false) RETURNING id;''')
                 version_id = cur.fetchone()[0]
                 conn.commit()
                 cur.execute(f'''INSERT INTO webapp_verseversion (verse_id, version_id, text) VALUES ({verse_id}, {version_id}, {version['verse']}) RETURNING id;''')
                 conn.commit()
 
             return version
+
+
+def insert_only_version(version, idiom_id):
+    """Insert a version into the database."""
+    if version['name'] == 'Nenhum registro encontrado!':
+        return False
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+
+            # select version by name
+            cur.execute(f'''INSERT INTO webapp_version (name, abbreviation, idiom_id, 'default') VALUES ('{version['name']}','{version['abbr']}', {idiom_id}, false) RETURNING id;''')
+            version_id = cur.fetchone()[0]
+            conn.commit()           
+
+            return version_id
+
+
+def insert_idiom(idiom):
+    """Insert an idiom into the database."""
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+            # select idiom by name
+            cur.execute(f'''INSERT INTO webapp_idiom (name, abbreviation) values ('{idiom['name']}', '{idiom['translate']}') RETURNING id;;''')
+            idiom_id = cur.fetchone()[0]
+            conn.commit()
+
+            return idiom_id
+
 
 def get_books():
     """Get all books from the database."""
@@ -161,6 +192,15 @@ def get_verse(book_id, chapter_id, verse_number):
             cur.execute(f'''SELECT * FROM webapp_verse WHERE book_id = {book_id} AND chapter_id = {chapter_id} AND "number" = {verse_number};''')
             verse = cur.fetchone()
             return verse
+
+
+def get_idiom_by_version(version_abbr):
+    """Get the idiom of a version."""
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+            cur.execute(f'''SELECT idiom_id FROM webapp_version WHERE abbreviation = '{version_abbr}';''')
+            idiom_id = cur.fetchone()
+            return idiom_id[0]
 
 # get_verse_id('1 Coríntios', '1', '1')
 # get_chapter_id
