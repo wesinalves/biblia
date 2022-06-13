@@ -29,16 +29,22 @@ def insert_chapter(book_id, chapter_number, verses):
             return chapter_id
 
 
-def insert_verse(book_id, chapter_id, version_id, verse_number, verse_text):
+def insert_verse(book_id, chapter_id, verse_number):
     """Insert a verse into the database."""
     with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
         with conn.cursor() as cur:
             cur.execute(f'''INSERT INTO webapp_verse (book_id, chapter_id, "number") VALUES ({book_id},{chapter_id}, {verse_number}) RETURNING id;''')
             verse_id = cur.fetchone()[0]
-            conn.commit()
-            cur.execute(f'''INSERT INTO webapp_verseversion (verse_id, version_id, "text") VALUES ({verse_id},{version_id}, '{verse_text}') RETURNING id;''')
-            conn.commit()
+            conn.commit()            
             return verse_id
+
+def insert_verseversion(verse_id, version_id, version_text):
+    """Insert a version into the database."""
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+            cur.execute(f'''INSERT INTO webapp_verseversion (verse_id, version_id, "text") VALUES ({verse_id}, {version_id}, '{version_text}') RETURNING id;''')
+            conn.commit()
+            return
 
 
 def insert_reference(book_id, chapter_id, verse_id, reference_text):
@@ -131,7 +137,7 @@ def insert_version(verse_id, version):
                 cur.execute(f'''INSERT INTO webapp_verseversion (verse_id, version_id, text) VALUES ({verse_id}, {version_id}, {version['verse']}) RETURNING id;''')
                 conn.commit()
             else:
-                cur.execute(f'''INSERT INTO webapp_version (name, abbreviation, idiom_id, 'default') VALUES ('{version['name']}','{version['abbr']}', {idiom_id}, false) RETURNING id;''')
+                cur.execute(f'''INSERT INTO webapp_version (name, abbreviation, idiom_id, "default") VALUES ('{version['name']}','{version['abbr']}', {idiom_id}, false) RETURNING id;''')
                 version_id = cur.fetchone()[0]
                 conn.commit()
                 cur.execute(f'''INSERT INTO webapp_verseversion (verse_id, version_id, text) VALUES ({verse_id}, {version_id}, {version['verse']}) RETURNING id;''')
@@ -148,7 +154,7 @@ def insert_only_version(version, idiom_id):
         with conn.cursor() as cur:
 
             # select version by name
-            cur.execute(f'''INSERT INTO webapp_version (name, abbreviation, idiom_id, 'default') VALUES ('{version['name']}','{version['abbr']}', {idiom_id}, false) RETURNING id;''')
+            cur.execute(f'''INSERT INTO webapp_version (name, abbreviation, idiom_id, "default") VALUES ('{version['name']}','{version['abbr']}', {idiom_id}, false) RETURNING id;''')
             version_id = cur.fetchone()[0]
             conn.commit()           
 
@@ -157,10 +163,13 @@ def insert_only_version(version, idiom_id):
 
 def insert_idiom(idiom):
     """Insert an idiom into the database."""
+
+    name = idiom.split(' ')[0].strip()
+    translate = idiom.split(' ')[1].strip()
     with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
         with conn.cursor() as cur:
             # select idiom by name
-            cur.execute(f'''INSERT INTO webapp_idiom (name, abbreviation) values ('{idiom['name']}', '{idiom['translate']}') RETURNING id;;''')
+            cur.execute(f'''INSERT INTO webapp_idiom (name, native_name, "default") values ('{name}', '{translate}', false) RETURNING id;;''')
             idiom_id = cur.fetchone()[0]
             conn.commit()
 
@@ -176,7 +185,7 @@ def get_books():
             return books
 
 
-def get_chapters(book_id):
+def get_chapters_by_book(book_id):
     """Get all chapters from a book."""
     with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
         with conn.cursor() as cur:
@@ -202,8 +211,42 @@ def get_idiom_by_version(version_abbr):
             idiom_id = cur.fetchone()
             return idiom_id[0]
 
-# get_verse_id('1 Coríntios', '1', '1')
-# get_chapter_id
+
+def get_all_versions():
+    """Get all versions from the database."""
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+            cur.execute(f'''SELECT * FROM webapp_version;''')
+            versions = cur.fetchall()
+            return versions
+
+
+def get_chapter(book_id, chapter_number):
+    """Get a chapter from a book."""
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+            cur.execute(f'''SELECT * FROM webapp_chapter WHERE book_id = {book_id} AND "number" = {chapter_number};''')
+            chapter = cur.fetchone()
+            return chapter
+
+
+def get_verse(book_id, chapter_id, verse_number):
+    """Get a verse from a chapter."""
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+            cur.execute(f'''SELECT * FROM webapp_verse WHERE book_id = {book_id} AND chapter_id = {chapter_id} AND "number" = {verse_number};''')
+            verse = cur.fetchone()
+            return verse
+
+
+def get_version(version_id):
+    """Get a version from the database."""
+    with psycopg2.connect("dbname=biblia user=postgres password=postgres host=localhost") as conn:
+        with conn.cursor() as cur:
+            cur.execute(f'''SELECT * FROM webapp_version WHERE id = {version_id};''')
+            version = cur.fetchone()
+            return version
+
 # get_book_id
 # insert_verse_version
 
