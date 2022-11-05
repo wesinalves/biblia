@@ -6,27 +6,20 @@ Author: Wesin Alves
 Data: 6/04/2022
 """
 
-import time
-from database import get_books, get_chapters
-from navigation import get_versions, open_url, close_driver,\
-    click_button, get_references, get_interlinear, get_dictionary
+from database import get_all_books, get_chapters_by_book
+from extract import extract_references, extract_interlinear, extract_dictionary
 
 
-books = get_books()  # id, name, abbr, chapters
+books = get_all_books()  # id, name, abbr, chapters
 
-for book in books:
-    chapters = get_chapters(book[0])  # id, cap, vers, livro     
-    for chapter in chapters:        
-        print(chapter)
-        open_url(book[2], chapter[1])
-        for verse in range(1, chapter[2]):
-            click_button(book[2], chapter[1], verse)
-            #get_references(book[2], chapter[1], verse)
-            get_interlinear(book[2], chapter[1], verse)
-            get_dictionary(book[2], chapter[1], verse)
-            get_versions(book[2], chapter[1], verse)
-            close_driver()
-            time.sleep(1)
-            break
-        break
-    break
+
+for b in range(47, len(books)):
+    print(f'scrapying {books[b][1]}', end='', flush=True)
+    chapters = get_chapters_by_book(books[b][0])  # id, cap, vers, livro
+    for i in range(0, len(chapters)):
+        print('.', end='', flush=True)
+        for verse in range(1, chapters[i][2] + 1):
+            extract_references(books[b][2], chapters[i][1], verse)
+            extract_interlinear(books[b][2], chapters[i][1], verse)
+            extract_dictionary(books[b][2], chapters[i][1], verse)
+    print('')    

@@ -8,7 +8,7 @@ Data: 6/04/2022
 
 import requests, bs4
 from database import get_verse, insert_book, insert_chapter, insert_verseversion,\
-    insert_verse, get_all_versions, get_chapter, get_chapters_by_book, get_version
+    insert_verse, get_all_versions, get_chapter, get_version
 
 """Setup initial parameters."""
 url_base = 'https://www.bibliaonline.com.br'
@@ -90,14 +90,10 @@ def get_verses(version, books):
 
 
 if __name__ == '__main__':
-    # versions = get_versions()
-    # books = get_books()    
-    # books = get_chapters_by_book(versions[0], books)
-    # for version in versions:
-    #     get_verses(version, books)
-
-    version = get_version(4)
-    books = get_books()
-    get_verses(version, books)
+    versions = get_versions()
+    books = get_books()    
+    books = get_chapters_by_book(versions[0], books)
+    for version in versions:
+        get_verses(version, books)    
 
     print("Terminado a raspagem de dados!")

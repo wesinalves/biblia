@@ -12,7 +12,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
-from database import insert_dictionary, insert_interlinear, insert_reference, insert_version
+from database import get_verse, insert_dictionary, insert_interlinear, \
+    insert_reference, insert_version, get_book, get_chapter
 
 
 driver = webdriver.Firefox()
@@ -28,8 +29,13 @@ def close_driver():
     driver.close()
 
 
+def scroll_page():
+    """Scroll page down."""
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+
 def click_button(abbr, chapter, verse):
-    """Click button in browser."""
+    """Click button in browser."""    
     button = driver.find_element(
         By.XPATH, f"//li[@id='{abbr}{chapter}{verse}']/img[1]")
     button.click()
@@ -44,9 +50,17 @@ def get_references(abbr, chapter, verse):
     reference.click()
     time.sleep(1)
     references = driver.find_elements(By.CLASS_NAME, "buttonTools")
-    for r in references:
-        print(r.get_attribute("onclick"))
+    
+    book_id = get_book(abbr)[0]
+    chapter_id = get_chapter(book_id, chapter)[0]
+    reference_id = get_verse(book_id, chapter_id, verse)[0]    
+    
+    for r in references:        
+        verse_number = r.get_attribute("onclick").split("/")[-1].replace("'", "")
+        chapter_number = int(r.get_attribute("onclick").split("/")[-2])
+        book_abbr = r.get_attribute("onclick").split("/")[-3]                  
         #save in database
+        insert_reference(book_abbr, chapter_number, verse_number, reference_id, r.text)
 
 
 def get_interlinear(abbr, chapter, verse):
@@ -57,9 +71,9 @@ def get_interlinear(abbr, chapter, verse):
     interlinear.click()
     time.sleep(1)
     interlineares = driver.find_elements(
-        By.XPATH, "//div[@class='toolResult']/ul")
-    for i in interlineares:
-        print(i.text)
+        By.XPATH, f"//div[@id='toolResult_RA{abbr}{chapter}{verse}']/ul")
+    #print(interlineares)
+    for i in interlineares:        
         #save in database
         insert_interlinear(verse, i.text)
 
@@ -72,12 +86,12 @@ def get_dictionary(abbr, chapter, verse):
     dictionary.click()
     time.sleep(1)
     dictionaries = driver.find_elements(
-        By.XPATH, "//div[@class='toolResult']/ul")
+        By.XPATH, f"//div[@id='toolResult_RA{abbr}{chapter}{verse}']/ul")
     for d in dictionaries:
-        title = d.text.split('-')[0].strip()
-        text = ''.join(d.text.split('-')[1:]).strip()
-        print(title)
-        print(text)
+        #title = d.text.split('-')[0].strip()
+        #text = ''.join(d.text.split('-')[1:]).strip()
+        #print(title)
+        #print(text)
         #save in database
         insert_dictionary(abbr, chapter, verse, d.text)
 
