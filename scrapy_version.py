@@ -35,30 +35,33 @@ def get_verses(version, books):
                 chapter_id = chapter[0]
             
             for index, verse in enumerate(verses):
-                if verse.attrs['class'][0] == 'MuiTypography-root':
-                    break
-                verse_number = len(str(index + 1))
-                verse_text = verse.getText()[verse_number:].strip().replace(
-                    "'", "''")
-                current_verse = get_verse(book[0], chapter_id, index+1)
-                if current_verse is None:
-                    verse_id = insert_verse(book[0], chapter_id, index+1)
-                    insert_verseversion(verse_id, version[0], verse_text)
-                else:
-                    insert_verseversion(
-                        current_verse[0],
-                        version[0],
-                        verse_text
-                    )
-                
-                print(f"{book[1]} cap {i+1} v. {index + 1} cadastrado!")
+                try:
+                    if verse.attrs['class'][0] == 'MuiTypography-root':
+                        break
+                    verse_number = len(str(index + 1))
+                    verse_text = verse.getText()[verse_number:].strip().replace(
+                        "'", "''")
+                    current_verse = get_verse(book[0], chapter_id, index+1)
+                    if current_verse is None:
+                        verse_id = insert_verse(book[0], chapter_id, index+1)
+                        insert_verseversion(verse_id, version[0], verse_text)
+                    else:
+                        insert_verseversion(
+                            current_verse[0],
+                            version[0],
+                            verse_text
+                        )
+                    
+                    print(f"{book[1]} cap {i+1} v. {index + 1} cadastrado!")
+                except:
+                    print(f'Não foi possível completar a raspagem do livro {book[1]} cap. {i+1} verso {index + 1}')
 
 
 if __name__ == '__main__':    
 
     books = get_all_books()  
     
-    for i in range(50, 60):        
+    for i in range(150, 160):        
         version = get_version(i)
         get_verses(version, books)
         print(f"Terminado a raspagem de dados i = {i}!")
