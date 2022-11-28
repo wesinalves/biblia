@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
     books = get_all_books()  
     
-    for i in range(150, 160):        
+    for i in range(140, 160):        
         version = get_version(i)
         get_verses(version, books)
         print(f"Terminado a raspagem de dados i = {i}!")
