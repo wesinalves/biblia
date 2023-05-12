@@ -91,8 +91,7 @@ def get_verses(version, books):
 
 if __name__ == '__main__':
     versions = get_versions()
-    books = get_books()    
-    books = get_chapters_by_book(versions[0], books)
+    books = get_books()        
     for version in versions:
         get_verses(version, books)    
 
