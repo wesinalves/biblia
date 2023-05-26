@@ -5,7 +5,7 @@ from database import get_verse, insert_dictionary, insert_interlinear, \
 
 def extract_references(abbr, chapter, verse):
     """Get references in browser."""
-    url = f"https://pesquisa.biblia.com.br/pt-BR/crossref/RA/{abbr}/{chapter}/{verse}"
+    url = f"https://pesquisa.biblia.com.br/pt-BR/crossref/ACF/{abbr}/{chapter}/{verse}"
     references = requests.get(url, allow_redirects=True)
 
     book_id = get_book(abbr)[0]
@@ -23,7 +23,7 @@ def extract_references(abbr, chapter, verse):
 
 def extract_interlinear(abbr, chapter, verse):
     """Get interlinear."""    
-    url = f"https://pesquisa.biblia.com.br/pt-BR/interlinear/RA/{abbr}/{chapter}/{verse}"
+    url = f"https://pesquisa.biblia.com.br/pt-BR/interlinear/ACF/{abbr}/{chapter}/{verse}"
     interlineares = requests.get(url, allow_redirects=True)
     
     book_id = get_book(abbr)[0]
@@ -40,7 +40,8 @@ def extract_dictionary(abbr, chapter, verse):
     book_id = get_book(abbr)[0]
     chapter_id = get_chapter(book_id, chapter)[0]
 
-    url = f"https://pesquisa.biblia.com.br/pt-BR/dictionary/RA/{abbr}/{chapter}/{verse}"
+    url = f"https://pesquisa.biblia.com.br/pt-BR/dictionary/ACF/{abbr}/{chapter}/{verse}"
+    
     dictionaries = requests.get(url, allow_redirects=True)
     for d in dictionaries.json():
         # save in database

@@ -12,8 +12,7 @@ from extract import extract_references, extract_interlinear, extract_dictionary
 
 books = get_all_books()  # id, name, abbr, chapters
 
-#juizes
-for b in range(0, len(books)):
+for b in range(64, len(books)):
     print(f'scrapying {books[b][1]}', end='', flush=True)
     chapters = get_chapters_by_book(books[b][0])  # id, cap, vers, livro
     for i in range(0, len(chapters)):
@@ -22,4 +21,7 @@ for b in range(0, len(books)):
             extract_references(books[b][2], chapters[i][1], verse)
             extract_interlinear(books[b][2], chapters[i][1], verse)
             extract_dictionary(books[b][2], chapters[i][1], verse)
-    print('')    
+    print('')
+
+
+# Atos.
