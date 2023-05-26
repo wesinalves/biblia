@@ -30,7 +30,7 @@ def get_verses(version, books):
             if total_verses % 10 > 0:
                 pages += 1
             for page in range(pages):
-                url = f"{url_base}/{version}/{book[2]}/{str(i+1)}?page={page + 1}"
+                url = f"{url_base}/{version[0]}/{book[2]}/{str(i+1)}?page={page + 1}"
                 print(url)
                 res = requests.get(url, verify=False)
                 soup = bs4.BeautifulSoup(res.text, 'html.parser')
@@ -46,11 +46,11 @@ def get_verses(version, books):
                     current_verse = get_verse(book[0], chapter_id, verse_number)
                     if current_verse is None:
                         verse_id = insert_verse(book['id'], chapter_id, verse_number)
-                        insert_verseversion(verse_id, version, verse_text)
+                        insert_verseversion(verse_id, version[1], verse_text)
                     else:
                         insert_verseversion(
                             current_verse[0],
-                            version,
+                            version[1],
                             verse_text
                         )
                     
@@ -59,7 +59,7 @@ def get_verses(version, books):
 
 if __name__ == '__main__':
     books = get_all_books()  # id, name, abbr, chapters
-
-    get_verses('NTLH', books)
+    version = ['NTLH', 160]
+    get_verses(version, books)
     
     print("Terminado a raspagem de dados!")
