@@ -7,8 +7,9 @@ Data: 6/04/2022
 """
 
 import requests, bs4
-from database import get_verse, insert_chapter, insert_verseversion,\
-    insert_verse, get_chapter, get_all_books, get_chapters_by_book
+from database import get_verse, insert_verseversion,\
+    insert_verse, get_chapter, get_all_books
+import math
 
 """Setup initial parameters."""
 url_base = 'https://pesquisa.biblia.com.br/pt-BR'
@@ -22,36 +23,38 @@ def get_verses(version, books):
     number_verses = 0
     for book in books:        
         for i in range(book[3]):
-            url = f"{url_base}/{version}/{book[2]}/{str(i+1)}"
-            print(url)
-            res = requests.get(url, verify=False)
-            soup = bs4.BeautifulSoup(res.text, 'html.parser')
-            verses = soup.select(".versiculoTexto")
-            number_verses += len(verses)
             chapter = get_chapter(book[0], i+1)
-            
             chapter_id = chapter[0]
-
-            # verses % 10
-            # # ?page={page + 1}
-            
-            for index, verse in enumerate(verses):                
+            total_verses = chapter[2]
+            pages = math.floor(total_verses / 10)
+            if total_verses % 10 > 0:
+                pages += 1
+            for page in range(pages):
+                url = f"{url_base}/{version}/{book[2]}/{str(i+1)}?page={page + 1}"
+                print(url)
+                res = requests.get(url, verify=False)
+                soup = bs4.BeautifulSoup(res.text, 'html.parser')
+                verses = soup.select(".versiculoTexto")                
+                number_verses += len(verses)
                 
-                verse_number = len(str(index + 1))
-                verse_text = verse.getText()[verse_number:].strip().replace(
-                    "'", "''")
-                current_verse = get_verse(book[0], chapter_id, index+1)
-                # if current_verse is None:
-                #     verse_id = insert_verse(book['id'], chapter_id, index+1)
-                #     insert_verseversion(verse_id, version[0], verse_text)
-                # else:
-                #     insert_verseversion(
-                #         current_verse[0],
-                #         version[0],
-                #         verse_text
-                #     )
-                
-                print(f"{book[1]} cap {i+1} v. {index + 1} cadastrado!")
+                for verse in verses:                
+                    
+                    verse_number = verse.a.text.strip()
+                    verse_text = verse.span.next_sibling.strip().replace(
+                        "'", "''")
+                    
+                    current_verse = get_verse(book[0], chapter_id, verse_number)
+                    if current_verse is None:
+                        verse_id = insert_verse(book['id'], chapter_id, verse_number)
+                        insert_verseversion(verse_id, version, verse_text)
+                    else:
+                        insert_verseversion(
+                            current_verse[0],
+                            version,
+                            verse_text
+                        )
+                    
+                    print(f"{book[1]} cap {i+1} v. {verse_number} cadastrado!")
 
 
 if __name__ == '__main__':
